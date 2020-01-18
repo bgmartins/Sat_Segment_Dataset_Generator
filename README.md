@@ -3,7 +3,7 @@ This project was developed to create datasets for semantic segmentation with sat
 *When using the data, please take note of the license terms of the data sources.* The image shows the satellite image on the left and the mask on the right. In this figure two variants of the mask are shown.
 In the left mask the OSM data was drawn normally, while on the right flood-fill was used to fill the street segments.
 Depending on the quality of the image data, the flood-fill can deliver good or bad results.
-![Data-Generator](/media/preview.png)
+
 # How To Use It
 This section describes how you can use the tool. This example uses the scenario shown above.
 ## Create The Configuration
@@ -128,7 +128,7 @@ The configuration defines how the dataset is supposed to be generated. The struc
 	]
 }
 ```
-![Data-Generator](/media/area_definition.png)
+
 ## Run The SSDG
 After the configuration has been created, the tool can be started with the following command, where `--output_path` defines the location to store the dataset and `--config_path` the path to the configuration created above. 
 You must replace `{{YOUR_APP_ID}}` and `{{YOUR_APP_CODE}}` with your Here-Api credentials, that you can get [here](https://developer.here.com/).

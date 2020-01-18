@@ -6,6 +6,8 @@ import argparse
 import requests
 import numpy as np
 import urllib.request
+from osgeo import gdal
+from osgeo import ogr
 from copy import deepcopy
 
 class SatSegmentDatasetGenerator:
