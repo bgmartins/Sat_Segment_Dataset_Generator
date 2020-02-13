@@ -1,5 +1,8 @@
 # Sat-Segment-Dataset-Generator
-This project was developed to create datasets for semantic segmentation with satellite images. The satellite images are obtained from Here-Map and the OSM data from OpenStreetMap. Depending on the configuration a mask is created, as for example in the following figure.
+
+This project was developed to create datasets for semantic segmentation with satellite images. 
+
+The satellite images are obtained from a WMS server and the OSM data from OpenStreetMap. Depending on the configuration a mask is created, as for example in the following figure.
 *When using the data, please take note of the license terms of the data sources.* The image shows the satellite image on the left and the mask on the right. In this figure two variants of the mask are shown.
 In the left mask the OSM data was drawn normally, while on the right flood-fill was used to fill the street segments.
 Depending on the quality of the image data, the flood-fill can deliver good or bad results.
@@ -37,7 +40,7 @@ The configuration defines how the dataset is supposed to be generated. The struc
 /*
 * Defines the image size of the Tiles. You can choose between 256 or 512.
 */
-	"here_api": {
+	"map_api": {
 		"tile_size": 512
 	},
 /*
@@ -131,7 +134,7 @@ The configuration defines how the dataset is supposed to be generated. The struc
 
 ## Run The SSDG
 After the configuration has been created, the tool can be started with the following command, where `--output_path` defines the location to store the dataset and `--config_path` the path to the configuration created above. 
-You must replace `{{YOUR_APP_ID}}` and `{{YOUR_APP_CODE}}` with your Here-Api credentials, that you can get [here](https://developer.here.com/).
+
 ```
-python3 sat_segment_dataset_generator.py --here_app_id {{YOUR_APP_ID}} --here_app_code {{YOUR_APP_CODE}} --output_path ./dataset --config_path ./config.cfg
+python3 sat_segment_dataset_generator.py --output_path ./dataset --config_path ./config.cfg
 ```
