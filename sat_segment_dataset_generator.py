@@ -11,18 +11,12 @@ from osgeo import ogr
 from copy import deepcopy
 
 class SatSegmentDatasetGenerator:
-    def __init__(self, here_app_id=None, here_app_code=None, config=None, output_path=None):
+    def __init__(self, config=None, output_path=None):
         if config is None:
             raise Exception("Please provide a configuration.")
-        if here_app_id is None or here_app_code is None:
-            raise Exception("Please provide your here api credentials.")
-        if output_path is None:
-            raise Exception("Please provide the ouput path.")
-        self.here_app_id = here_app_id
-        self.here_app_code = here_app_code
         self.config = config
         self.output_path = output_path
-        self.here_map_tiles = []
+        self.map_tiles = []
         self.calculate_tiles()
         self.process_tiles()
 
@@ -41,32 +35,32 @@ class SatSegmentDatasetGenerator:
             top_left_tile_column = None
             bottom_right_tile_row = None
             bottom_right_tile_column = None
-            top_left_tile_row, top_left_tile_column = self.calculate_heremap_coordinate(latitude=lc["top_left_location"]["latitude"], longitude=lc["top_left_location"]["longitude"], zoom=zoom)
-            bottom_right_tile_row, bottom_right_tile_column = self.calculate_heremap_coordinate(latitude=lc["bottom_right_location"]["latitude"], longitude=lc["bottom_right_location"]["longitude"], zoom=zoom)
+            top_left_tile_row, top_left_tile_column = self.calculate_map_coordinate(latitude=lc["top_left_location"]["latitude"], longitude=lc["top_left_location"]["longitude"], zoom=zoom)
+            bottom_right_tile_row, bottom_right_tile_column = self.calculate_map_coordinate(latitude=lc["bottom_right_location"]["latitude"], longitude=lc["bottom_right_location"]["longitude"], zoom=zoom)
             if top_left_tile_column == bottom_right_tile_column and top_left_tile_row == bottom_right_tile_row: # Stop when top-left and bottom-right tiles are the same (max zoom reached)
-                self.here_map_tiles.append([zoom, top_left_tile_row, top_left_tile_column])
+                self.map_tiles.append([zoom, top_left_tile_row, top_left_tile_column])
                 break
             else:
                 for row in range(top_left_tile_row, bottom_right_tile_row + 1):
                     for column in range(top_left_tile_column, bottom_right_tile_column + 1):
-                        self.here_map_tiles.append([zoom, row, column])
-        print(str(len(self.here_map_tiles)) + " tiles to process.")
+                        self.map_tiles.append([zoom, row, column])
+        print(str(len(self.map_tiles)) + " tiles to process.")
 
     def process_tiles(self):
-        percentage_per_tile = 100 / len(self.here_map_tiles)
+        percentage_per_tile = 100 / len(self.map_tiles)
         counter = 0
         print("0.00%: Starting...", end = '\r')
-        for here_map_tile_definition in self.here_map_tiles:
-            filename = str(here_map_tile_definition[0]) + "_" + str(here_map_tile_definition[1]) + "_" + str(here_map_tile_definition[2])
+        for map_tile_definition in self.map_tiles:
+            filename = str(map_tile_definition[0]) + "_" + str(map_tile_definition[1]) + "_" + str(map_tile_definition[2])
             print(str(round(percentage_per_tile * counter, 2)) + "%: Download satellite image", end = '\r')
-            satellite_tile = self.download_heramap_tile(here_map_tile_definition[0], here_map_tile_definition[1], here_map_tile_definition[2])
+            satellite_tile = self.download_heramap_tile(map_tile_definition[0], map_tile_definition[1], map_tile_definition[2])
             print(str(round(percentage_per_tile * counter, 2)) + "%: Calculate geo-coordinates", end = '\r')
             # Calculate left-top corner
-            left_top_latitude, left_top_longitude = self.heremap_to_geographical_coordinate(here_map_tile_definition[0], here_map_tile_definition[1], here_map_tile_definition[2])
+            left_top_latitude, left_top_longitude = self.map_to_geographical_coordinate(map_tile_definition[0], map_tile_definition[1], map_tile_definition[2])
             # Calculate right-top corner 
-            right_top_latitude, right_top_longitude = self.heremap_to_geographical_coordinate(here_map_tile_definition[0], here_map_tile_definition[1], here_map_tile_definition[2] + 1)
+            right_top_latitude, right_top_longitude = self.map_to_geographical_coordinate(map_tile_definition[0], map_tile_definition[1], map_tile_definition[2] + 1)
             # Calculate left-bottom corner 
-            left_bottom_latitude, left_bottom_longitude = self.heremap_to_geographical_coordinate(here_map_tile_definition[0], here_map_tile_definition[1] + 1, here_map_tile_definition[2])
+            left_bottom_latitude, left_bottom_longitude = self.map_to_geographical_coordinate(map_tile_definition[0], map_tile_definition[1] + 1, map_tile_definition[2])
             print(str(round(percentage_per_tile * counter, 2)) + "%: Download osm data          ", end = '\r')
             label_data = self.download_overpass_data(percentage=str(round(percentage_per_tile * counter, 2)), south_latitude=left_bottom_latitude, west_longitude=left_bottom_longitude, north_latitude=right_top_latitude, east_longitude=right_top_longitude)
             print(str(round(percentage_per_tile * counter, 2)) + "%: Draw mask                          ", end = '\r')
@@ -78,7 +72,7 @@ class SatSegmentDatasetGenerator:
             counter += 1
         print("100.00%: Finished                                   ", end = '\r')
 
-    def calculate_heremap_coordinate(self, latitude=None, longitude=None, zoom=None):
+    def calculate_map_coordinate(self, latitude=None, longitude=None, zoom=None):
         n = (2 ** zoom)
         latitude_rad = latitude * math.pi / 180
         column = n * ((longitude + 180) / 360)
@@ -86,9 +80,9 @@ class SatSegmentDatasetGenerator:
         return int(row), int(column)
 
     def download_heramap_tile(self, zoom=None, row=None, column=None):
-        return cv2.imdecode(np.asarray(bytearray(urllib.request.urlopen("https://1.aerial.maps.api.here.com/maptile/2.1/maptile/newest/satellite.day/" + str(zoom) + "/" + str(int(column)) + "/" + str(int(row)) + "/" + str(self.config["here_api"]["tile_size"]) + "/png" + "?app_id=" + self.here_app_id + "&app_code=" + self.here_app_code).read()), dtype='uint8'), cv2.IMREAD_COLOR)
+        return cv2.imdecode(np.asarray(bytearray(urllib.request.urlopen("https://1.aerial.maps.api.here.com/maptile/2.1/maptile/newest/satellite.day/" + str(zoom) + "/" + str(int(column)) + "/" + str(int(row)) + "/" + str(self.config["map_api"]["tile_size"]) + "/png").read()), dtype='uint8'), cv2.IMREAD_COLOR)
 
-    def heremap_to_geographical_coordinate(self, zoom=None, row=None, column=None):
+    def map_to_geographical_coordinate(self, zoom=None, row=None, column=None):
         n = (2 ** zoom)
         latitude = (math.acos(1 / (0.5 * ((math.e ** (math.pi - (2.0 * row * math.pi)/n)) + (math.e ** ((2.0 * row * math.pi) / n - math.pi))))) * 180.0) / math.pi
         longitude = (360.0 * (column / n)) - 180.0
@@ -130,7 +124,7 @@ class SatSegmentDatasetGenerator:
         return label_data
 
     def draw_mask(self, percentage="0.0.", tile=None, label_data=None, left_top=None, right_top=None, left_bottom=None):
-        mask = np.zeros((self.config["here_api"]["tile_size"], self.config["here_api"]["tile_size"], 3), dtype = "uint8")
+        mask = np.zeros((self.config["map_api"]["tile_size"], self.config["map_api"]["tile_size"], 3), dtype = "uint8")
         counter = 1
         category_count = str(len(label_data["categories"]))
         for category in label_data["categories"]:
@@ -198,8 +192,8 @@ class SatSegmentDatasetGenerator:
         return mask
 
     def geographical_coordinate_to_pixel(self, geographical_points=[], left_top=None, right_top=None, left_bottom=None):
-        width_pp = self.config["here_api"]["tile_size"] / math.sqrt(((right_top[1] - left_top[1]) ** 2) + ((right_top[0] - left_top[0]) ** 2))
-        height_pp = self.config["here_api"]["tile_size"] / math.sqrt(((left_top[1] - left_bottom[1]) ** 2) + ((left_top[0] - left_bottom[0]) ** 2)) 
+        width_pp = self.config["map_api"]["tile_size"] / math.sqrt(((right_top[1] - left_top[1]) ** 2) + ((right_top[0] - left_top[0]) ** 2))
+        height_pp = self.config["map_api"]["tile_size"] / math.sqrt(((left_top[1] - left_bottom[1]) ** 2) + ((left_top[0] - left_bottom[0]) ** 2)) 
         pixel_points = []
         for point in geographical_points:
             pixel_points.append([
@@ -211,8 +205,6 @@ class SatSegmentDatasetGenerator:
 if __name__ == "__main__":
     # Define arguments with there default values
     ap = argparse.ArgumentParser()
-    ap.add_argument("-app_id", "--here_app_id", required=True, help="Here-Api credentials.")
-    ap.add_argument("-app_code", "--here_app_code", required=True, help="Here-Api credentials.")
     ap.add_argument("-output", "--output_path", required=True, help="Location to store the images.")
     ap.add_argument("-config", "--config_path", required=True, help="Location of the config file.")
     args = vars(ap.parse_args())
@@ -230,4 +222,4 @@ if __name__ == "__main__":
     with open(args["config_path"]) as json_file:
         config = json.load(json_file)
     # Create SatSegmentDatasetGenerator and do job
-    satSegmentDatasetGenerator = SatSegmentDatasetGenerator(here_app_id=args["here_app_id"], here_app_code=args["here_app_code"], output_path=args["output_path"], config=config)
+    satSegmentDatasetGenerator = SatSegmentDatasetGenerator(output_path=args["output_path"], config=config)
