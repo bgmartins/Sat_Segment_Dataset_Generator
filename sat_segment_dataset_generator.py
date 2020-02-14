@@ -211,7 +211,6 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("-output", "--output_path", required=True, help="Location to store the images.")
     ap.add_argument("-config", "--config_path", required=True, help="Location of the config file.")
-    ap.add_argument("-config", "--map_config_path", required=True, help="Location of the config file for the map proxy server.")
     args = vars(ap.parse_args())
 
     # Verify the passed parameters
@@ -220,12 +219,9 @@ if __name__ == "__main__":
         print("Directory for dataset created on '" + args["output_path"] + "'.")
     if not os.path.isfile(args["config_path"]):
         raise Exception("Path to config is invalid.")
-    if not os.path.isfile(args["map_config_path"]):
-        raise Exception("Path to map config is invalid.")
-    
-    
+        
     # Launch a map proxy server
-    aux=subprocess.Popen(["mapproxy-util", "serve-develop", args["map_config_path"], "--bind", "localhost:8080"])
+    aux=subprocess.Popen(["mapproxy-util", "serve-develop", self.config["map_api"]["config_path"], "--bind", "localhost:8080"])
     
     # Load config as JSON
     print("Load configuration.")

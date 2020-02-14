@@ -2,15 +2,19 @@
 
 This project was developed to create datasets for semantic segmentation with satellite images. 
 
-The satellite images are obtained from a WMS server and the OSM data from OpenStreetMap. Depending on the configuration a mask is created, as for example in the following figure.
+The satellite images are obtained from a server supported by [MapProxy](https://mapproxy.org/) and the OSM data from [OpenStreetMap](https://www.openstreetmap.org). Depending on the configuration a mask is created, as for example in the following figure.
 *When using the data, please take note of the license terms of the data sources.* The image shows the satellite image on the left and the mask on the right. In this figure two variants of the mask are shown.
 In the left mask the OSM data was drawn normally, while on the right flood-fill was used to fill the street segments.
 Depending on the quality of the image data, the flood-fill can deliver good or bad results.
 
 # How To Use It
+
 This section describes how you can use the tool. This example uses the scenario shown above.
+
 ## Create The Configuration
+
 The configuration defines how the dataset is supposed to be generated. The structure of the configuration is explained by the following comments.
+
 ```java
 {
 /*
@@ -41,7 +45,8 @@ The configuration defines how the dataset is supposed to be generated. The struc
 * Defines the image size of the tiles.
 */
 	"map_api": {
-		"tile_size": 512
+		"tile_size": 512,
+                "config_path": "config-example1.yaml"
 	},
 /*
 * This part determines timeouts and attempts for the Overpass-Api.
@@ -70,6 +75,8 @@ The configuration defines how the dataset is supposed to be generated. The struc
 	    {
 			"overpass_api_query": "way[area][highway]({{bbox}}); way[area][amenity=parking]({{bbox}});",
 			"expand_view": 0.0005,
+                        "min_pixel_ratio": 0.0,
+                        "max_pixel_ratio": 1.0,
 			"draw_options": {
 				"type": "area",
 				"color": {"b":0, "g":255, "r":0}
@@ -78,6 +85,8 @@ The configuration defines how the dataset is supposed to be generated. The struc
 	    {
 			"overpass_api_query": "way[!area][highway]({{bbox}}); way[!area][amenity=parking]({{bbox}});",
 			"expand_view": 0.0005,
+                        "min_pixel_ratio": 0.0,
+                        "max_pixel_ratio": 1.0,
 			"draw_options": {
 				"type": "line",
 				"color": {"b":0, "g":255, "r":0},
@@ -88,6 +97,8 @@ The configuration defines how the dataset is supposed to be generated. The struc
 	    {
 			"overpass_api_query": "way[area][natural=water]({{bbox}}); way[area][natural=dam]({{bbox}});",
 			"expand_view": 0.0005,
+                        "min_pixel_ratio": 0.0,
+                        "max_pixel_ratio": 1.0,
 			"draw_options": {
 				"type": "area",
 				"color": {"b":255, "g":0, "r":0}
@@ -96,6 +107,8 @@ The configuration defines how the dataset is supposed to be generated. The struc
 	    {
 			"overpass_api_query": "way[waterway=river]({{bbox}});",
 			"expand_view": 0.0005,
+                        "min_pixel_ratio": 0.0,
+                        "max_pixel_ratio": 1.0,
 			"draw_options": {
 				"type": "line",
 				"color": {"b":255, "g":0, "r":0},
@@ -105,6 +118,8 @@ The configuration defines how the dataset is supposed to be generated. The struc
 	    {
 			"overpass_api_query": "way[railway]({{bbox}});",
 			"expand_view": 0.0005,
+                        "min_pixel_ratio": 0.0,
+                        "max_pixel_ratio": 1.0,
 			"draw_options": {
 				"type": "line",
 				"color": {"b":0, "g":0, "r":255},
@@ -114,6 +129,8 @@ The configuration defines how the dataset is supposed to be generated. The struc
 	    {
 			"overpass_api_query": "node[natural=tree]({{bbox}});",
 			"expand_view": 0.0005,
+                        "min_pixel_ratio": 0.0,
+                        "max_pixel_ratio": 1.0,
 			"draw_options": {
 				"type": "dot",
 				"color": {"b":0, "g":0, "r":0},
@@ -121,8 +138,10 @@ The configuration defines how the dataset is supposed to be generated. The struc
 			}
 	    },
 	    {
-			"overpass_api_query": "way[building]({{bbox}});",
+			"overpass_api_query": "way[building][start_date](if:date(t[start_date])>1900 && date(t[start_date])<2020)({{bbox}});",
 			"expand_view": 0.0005,
+                        "min_pixel_ratio": 0.0,
+                        "max_pixel_ratio": 1.0,
 			"draw_options": {
 				"type": "area",
 				"color": {"b":255, "g":255, "r":255}
