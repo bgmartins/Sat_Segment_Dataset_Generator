@@ -3,6 +3,8 @@ import cv2
 import json
 import math
 import time
+import atexit
+import signal
 import argparse
 import requests
 import subprocess
@@ -21,12 +23,11 @@ class SatSegmentDatasetGenerator:
         self.output_path = output_path
         self.map_tiles = []
         self.proxy=subprocess.Popen(["mapproxy-util", "serve-develop", config["map_api"]["config_path"]])
+        def kill_child(): os.kill(self.proxy.pid, signal.SIGTERM)
+        atexit.register(kill_child)
         time.sleep(5)
         self.calculate_tiles()
         self.process_tiles()
-
-    def __delete__(self, instance):
-        self.proxy.terminate()
 
     def calculate_tiles(self):
         lc = self.config["location_range"]
@@ -88,8 +89,8 @@ class SatSegmentDatasetGenerator:
         return int(row), int(column)
 
     def download_map_tile(self, zoom=None, row=None, column=None):
-        aux = cv2.imdecode(np.asarray(bytearray(urllib.request.urlopen("http://127.0.0.1:8080/tms/1.0.0/base/EPSG900913/" + str(zoom) + "/" + str(int(column)) + "/" + str(int(row)) + ".png").read()), dtype='uint8'), cv2.IMREAD_COLOR)
-        dim = ( int(self.config["map_api"]["tile_size"]) , int(self.config["map_api"]["tile_size"]) )        
+        aux = cv2.imdecode(np.asarray(bytearray(urllib.request.urlopen("http://127.0.0.1:8080/tms/1.0.0/base/EPSG3857/" + str(zoom) + "/" + str(int(column)) + "/" + str(int(row)) + ".png").read()), dtype='uint8'), cv2.IMREAD_COLOR)
+        dim = ( int(self.config["map_api"]["tile_size"]) , int(self.config["map_api"]["tile_size"]) )
         aux = cv2.resize(aux, dim)
         return aux
     

@@ -10,12 +10,12 @@ layers:
 
 caches:
   my_cache:
-    grids: [my_grid,osm_grid]
+    grids: [my_grid]
     sources: [my_cache_in]
     meta_size: [4, 4]
   my_cache_in:
-    grids: [osm_grid]
-    sources: [my_source]
+    grids: [my_grid]
+    sources: [my_source2]
 
 sources:
   my_source:
