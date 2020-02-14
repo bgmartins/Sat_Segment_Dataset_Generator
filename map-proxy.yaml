@@ -1,0 +1,21 @@
+layers:
+  - name: base
+    title: base
+    sources: [my_source]
+
+services:
+  tms:
+    origin: 'nw'
+	
+sources:
+  my_source:
+    type: tile
+    grid: GLOBAL_WEBMERCATOR
+    url: http://a.tile.openstreetmap.org/%(z)s/%(x)s/%(y)s.png
+  my_source2:
+    type: wms
+	supported_srs: ['EPSG:4326', 'EPSG:25832']
+    req:
+      url: http://localhost:42423/service
+      layers: aerial
+      transparent: false
