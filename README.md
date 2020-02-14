@@ -38,7 +38,7 @@ The configuration defines how the dataset is supposed to be generated. The struc
         }
     },
 /*
-* Defines the image size of the Tiles. You can choose between 256 or 512.
+* Defines the image size of the tiles.
 */
 	"map_api": {
 		"tile_size": 512
@@ -136,5 +136,5 @@ The configuration defines how the dataset is supposed to be generated. The struc
 After the configuration has been created, the tool can be started with the following command, where `--output_path` defines the location to store the dataset and `--config_path` the path to the configuration created above. 
 
 ```
-python3 sat_segment_dataset_generator.py --output_path ./dataset --config_path ./config.cfg
+python3 sat_segment_dataset_generator.py --output_path ./dataset --config_path ./config.cfg --map_config_path ./map_config.yaml
 ```
