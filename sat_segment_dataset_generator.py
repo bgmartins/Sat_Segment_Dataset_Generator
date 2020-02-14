@@ -53,7 +53,7 @@ class SatSegmentDatasetGenerator:
         for map_tile_definition in self.map_tiles:
             filename = str(map_tile_definition[0]) + "_" + str(map_tile_definition[1]) + "_" + str(map_tile_definition[2])
             print(str(round(percentage_per_tile * counter, 2)) + "%: Download satellite image", end = '\r')
-            satellite_tile = self.download_heramap_tile(map_tile_definition[0], map_tile_definition[1], map_tile_definition[2])
+            satellite_tile = self.download_map_tile(map_tile_definition[0], map_tile_definition[1], map_tile_definition[2])
             print(str(round(percentage_per_tile * counter, 2)) + "%: Calculate geo-coordinates", end = '\r')
             # Calculate left-top corner
             left_top_latitude, left_top_longitude = self.map_to_geographical_coordinate(map_tile_definition[0], map_tile_definition[1], map_tile_definition[2])
@@ -79,8 +79,8 @@ class SatSegmentDatasetGenerator:
         row = (n * (1 - (math.log( math.tan(latitude_rad) + (1 / math.cos(latitude_rad))) / math.pi))) / 2
         return int(row), int(column)
 
-    def download_heramap_tile(self, zoom=None, row=None, column=None):
-        return cv2.imdecode(np.asarray(bytearray(urllib.request.urlopen("https://1.aerial.maps.api.here.com/maptile/2.1/maptile/newest/satellite.day/" + str(zoom) + "/" + str(int(column)) + "/" + str(int(row)) + "/" + str(self.config["map_api"]["tile_size"]) + "/png").read()), dtype='uint8'), cv2.IMREAD_COLOR)
+    def download_map_tile(self, zoom=None, row=None, column=None):
+        return cv2.imdecode(np.asarray(bytearray(urllib.request.urlopen("http://localhost:8080/" + str(zoom) + "/" + str(int(column)) + "/" + str(int(row)) + "/" + str(self.config["map_api"]["tile_size"]) + "/png").read()), dtype='uint8'), cv2.IMREAD_COLOR)
 
     def map_to_geographical_coordinate(self, zoom=None, row=None, column=None):
         n = (2 ** zoom)
@@ -207,6 +207,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("-output", "--output_path", required=True, help="Location to store the images.")
     ap.add_argument("-config", "--config_path", required=True, help="Location of the config file.")
+    ap.add_argument("-config", "--map_config_path", required=True, help="Location of the config file for the map server.")
     args = vars(ap.parse_args())
 
     # Verify the passed parameters
@@ -215,7 +216,11 @@ if __name__ == "__main__":
         print("Directory for dataset created on '" + args["output_path"] + "'.")
     if not os.path.isfile(args["config_path"]):
         raise Exception("Path to config is invalid.")
-
+    if not os.path.isfile(args["map_config_path"]):
+        raise Exception("Path to map config is invalid.")
+        
+    os.system('mapproxy-util serve-develop ' + args["map_config_path"] + ' --bind localhost:8080')
+    
     # Load config as JSON
     print("Load configuration.")
     config = None
