@@ -1,3 +1,4 @@
+
 services:
   tms:
     origin: 'nw'
@@ -11,6 +12,7 @@ caches:
   my_cache:
     grids: [my_grid,osm_grid]
     sources: [my_cache_in]
+    meta_size: [4, 4]
   my_cache_in:
     grids: [osm_grid]
     sources: [my_source]
@@ -30,7 +32,9 @@ sources:
 grids:
   osm_grid:
     srs: EPSG:900913
+    num_levels: 19
     origin: nw
   my_grid:
     srs: EPSG:3857
+    num_levels: 19
     origin: nw
