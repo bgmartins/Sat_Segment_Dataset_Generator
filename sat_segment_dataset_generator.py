@@ -12,14 +12,19 @@ from osgeo import ogr
 from copy import deepcopy
 
 class SatSegmentDatasetGenerator:
+
     def __init__(self, config=None, output_path=None):
         if config is None:
             raise Exception("Please provide a configuration.")
         self.config = config
         self.output_path = output_path
         self.map_tiles = []
+        self.proxy=subprocess.Popen(["mapproxy-util", "serve-develop", config["map_api"]["config_path"], "--bind", "localhost:8080"])
         self.calculate_tiles()
         self.process_tiles()
+
+    def __delete__(self, instance):
+        self.proxy.terminate()
 
     def calculate_tiles(self):
         lc = self.config["location_range"]
@@ -219,15 +224,10 @@ if __name__ == "__main__":
         print("Directory for dataset created on '" + args["output_path"] + "'.")
     if not os.path.isfile(args["config_path"]):
         raise Exception("Path to config is invalid.")
-        
-    # Launch a map proxy server
-    aux=subprocess.Popen(["mapproxy-util", "serve-develop", self.config["map_api"]["config_path"], "--bind", "localhost:8080"])
-    
+            
     # Load config as JSON
     print("Load configuration.")
     config = None
-    with open(args["config_path"]) as json_file:
-        config = json.load(json_file)
+    with open(args["config_path"]) as json_file: config = json.load(json_file)
     # Create SatSegmentDatasetGenerator and do job
     satSegmentDatasetGenerator = SatSegmentDatasetGenerator(output_path=args["output_path"], config=config)
-    aux.terminate()
