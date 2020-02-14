@@ -81,8 +81,11 @@ class SatSegmentDatasetGenerator:
         return int(row), int(column)
 
     def download_map_tile(self, zoom=None, row=None, column=None):
-        return cv2.imdecode(np.asarray(bytearray(urllib.request.urlopen("http://localhost:8080/" + str(zoom) + "/" + str(int(column)) + "/" + str(int(row)) + "/" + str(self.config["map_api"]["tile_size"]) + "/png").read()), dtype='uint8'), cv2.IMREAD_COLOR)
-
+        aux = cv2.imdecode(np.asarray(bytearray(urllib.request.urlopen("http://localhost:8080/tms/1.0.0/base/EPSG900913/" + str(zoom) + "/" + str(int(column)) + "/" + str(int(row)) + ".png").read()), dtype='uint8'), cv2.IMREAD_COLOR)
+        dim = ( int(self.config["map_api"]["tile_size"]) , int(self.config["map_api"]["tile_size"]) )        
+        aux = cv2.resize(aux, dim)
+        return aux
+    
     def map_to_geographical_coordinate(self, zoom=None, row=None, column=None):
         n = (2 ** zoom)
         latitude = (math.acos(1 / (0.5 * ((math.e ** (math.pi - (2.0 * row * math.pi)/n)) + (math.e ** ((2.0 * row * math.pi) / n - math.pi))))) * 180.0) / math.pi
