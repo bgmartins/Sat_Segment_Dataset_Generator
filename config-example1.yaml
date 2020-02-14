@@ -5,7 +5,8 @@ layers:
 
 services:
   tms:
-    origin: 'nw'	
+    origin: 'nw'
+    srs: ['EPSG:900913']
 
 sources:
   my_source:
@@ -14,7 +15,6 @@ sources:
     url: http://a.tile.openstreetmap.org/%(z)s/%(x)s/%(y)s.png
   my_source2:
     type: wms
-       supported_srs: ['EPSG:4326', 'EPSG:3857', 'EPSG:3035']
     req:
        url: https://image.discomap.eea.europa.eu/arcgis/services/GioLand/HRIM_HR_TrueColour_2018/ImageServer/WMSServer
        layers: 0
