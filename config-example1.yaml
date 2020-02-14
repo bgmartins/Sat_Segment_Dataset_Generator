@@ -1,21 +1,36 @@
-layers:
-  - name: base
-    title: base
-    sources: [my_source]
-
 services:
   tms:
     origin: 'nw'
-    srs: ['EPSG:900913']
+    
+layers:
+  - name: base
+    title: Base Layer
+    sources: [my_cache]
+
+caches:
+  my_cache:
+    grids: [my_grid,osm_grid]
+    sources: [my_cache_in]
+  my_cache_in:
+    grids: [osm_grid]
+    sources: [my_source]
 
 sources:
   my_source:
-    type: tile
-    grid: GLOBAL_WEBMERCATOR
-    url: http://a.tile.openstreetmap.org/%(z)s/%(x)s/%(y)s.png
+     type: tile
+     url: http://c.tile.openstreetmap.org/%(z)s/%(x)s/%(y)s.png
+     grid: osm_grid
   my_source2:
     type: wms
     req:
        url: https://image.discomap.eea.europa.eu/arcgis/services/GioLand/HRIM_HR_TrueColour_2018/ImageServer/WMSServer
        layers: 0
        transparent: false
+
+grids:
+  osm_grid:
+    srs: EPSG:900913
+    origin: nw
+  my_grid:
+    srs: EPSG:3857
+    origin: nw
