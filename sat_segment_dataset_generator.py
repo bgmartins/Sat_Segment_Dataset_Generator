@@ -4,6 +4,7 @@ import json
 import math
 import argparse
 import requests
+import subprocess
 import numpy as np
 import urllib.request
 from osgeo import gdal
@@ -207,7 +208,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("-output", "--output_path", required=True, help="Location to store the images.")
     ap.add_argument("-config", "--config_path", required=True, help="Location of the config file.")
-    ap.add_argument("-config", "--map_config_path", required=True, help="Location of the config file for the map server.")
+    ap.add_argument("-config", "--map_config_path", required=True, help="Location of the config file for the map proxy server.")
     args = vars(ap.parse_args())
 
     # Verify the passed parameters
@@ -218,8 +219,10 @@ if __name__ == "__main__":
         raise Exception("Path to config is invalid.")
     if not os.path.isfile(args["map_config_path"]):
         raise Exception("Path to map config is invalid.")
-        
-    os.system('mapproxy-util serve-develop ' + args["map_config_path"] + ' --bind localhost:8080')
+    
+    
+    # Launch a map proxy server
+    aux=subprocess.Popen(["mapproxy-util", "serve-develop", args["map_config_path"], "--bind", "localhost:8080"])
     
     # Load config as JSON
     print("Load configuration.")
@@ -228,3 +231,4 @@ if __name__ == "__main__":
         config = json.load(json_file)
     # Create SatSegmentDatasetGenerator and do job
     satSegmentDatasetGenerator = SatSegmentDatasetGenerator(output_path=args["output_path"], config=config)
+    aux.terminate()
