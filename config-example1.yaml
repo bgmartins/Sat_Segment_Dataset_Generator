@@ -14,14 +14,42 @@ caches:
     disable_storage: true
   my_cache_in:
     grids: [my_grid]
-    sources: [my_source]
+    sources: [historical_scotland]
     disable_storage: true
 
 sources:
-  my_source:
+  world_imagery:
      type: tile
-#     url: http://tile.stamen.com/toner/%(z)s/%(x)s/%(y)s.png
      url: https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/%(z)s/%(y)s/%(x)s.png
+     grid: my_grid
+  modis:
+     type: tile
+     url: https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/2012-07-09/250m/%(z)s/%(y)s/%(x)s.jpg
+     grid: my_grid
+  aster_dem:
+     type: tile
+     url: https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/ASTER_GDEM_Color_Index/default/2014-01-01/EPSG4326_31m/%(z)s/%(y)s/%(x)s.png
+     grid: my_grid
+  satelite:
+     type: tile
+     url: https://api.maptiler.com/tiles/satellite/%(z)s/%(x)s/%(y)s.jpg?key=yTuGzyN37XmPunQ0pCUX
+     grid: my_grid
+  sentinel_2018:
+     type: tile
+     url: https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2018_3857/default/GoogleMapsCompatible/%(z)s/%(y)s/%(x)s.jpg
+     grid: my_grid
+  sentinel_2016:
+     type: tile
+     url: https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/GoogleMapsCompatible/%(z)s/%(y)s/%(x)s.jpg
+     grid: my_grid
+  historical_melbourne:
+     type: tile
+     #url: http://1945.melbourne/tileserver-php-master/s0za1yvi/%(z)s/%(x)s/%(y)s.png
+     url: http://mapwarper.net/maps/tile/45646/%(z)s/%(x)s/%(y)s.png
+     grid: my_grid
+  historical_scotland:
+     type: tile
+     url: http://nls-1.tileserver.com/nls/%(z)s/%(x)s/%(y)s.jpg
      grid: my_grid
 
 grids:
