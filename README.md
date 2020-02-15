@@ -2,7 +2,7 @@
 
 This project was developed to create datasets for semantic segmentation with overhead imagery. 
 
-The satellite or aerial images are obtained from a server supported by [MapProxy](https://mapproxy.org/) and the segmentation masks as built through OSM data from [OpenStreetMap](https://www.openstreetmap.org). 
+The satellite or aerial images are obtained from a server supported by [MapProxy](https://mapproxy.org/), as specified in a configuration file, and the segmentation masks as built through OSM data from [OpenStreetMap](https://www.openstreetmap.org). 
 
 Depending on the configuration, a segmentation mask is created for particular types of objects. OSM data can be drawn normally, or a flood-fill algorithm can be used to fill the street segments. Depending on the quality of the image data, the flood-fill can deliver good or bad results.
 
