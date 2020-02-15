@@ -14,7 +14,7 @@ from osgeo import gdal
 from osgeo import ogr
 from copy import deepcopy
 
-class SatSegmentDatasetGenerator:
+class SegmentDatasetGenerator:
 
     def __init__(self, config=None, output_path=None):
         if config is None:
@@ -238,5 +238,5 @@ if __name__ == "__main__":
     print("Load configuration.")
     config = None
     with open(args["config_path"]) as json_file: config = json.load(json_file)
-    # Create SatSegmentDatasetGenerator and do job
-    satSegmentDatasetGenerator = SatSegmentDatasetGenerator(output_path=args["output_path"], config=config)
+    # Create SegmentDatasetGenerator and do job
+    satSegmentDatasetGenerator = SegmentDatasetGenerator(output_path=args["output_path"], config=config)
