@@ -14,7 +14,7 @@ caches:
     disable_storage: true
   my_cache_in:
     grids: [my_grid]
-    sources: [historical_scotland]
+    sources: [satelite]
     disable_storage: true
 
 sources:
@@ -51,11 +51,11 @@ sources:
      #url: http://1945.melbourne/tileserver-php-master/s0za1yvi/%(z)s/%(x)s/%(y)s.png
      url: http://mapwarper.net/maps/tile/45646/%(z)s/%(x)s/%(y)s.png
      grid: my_grid
-  historical_scotland:
+  historical_map_scotland:
      type: tile
      url: http://nls-1.tileserver.com/nls/%(z)s/%(x)s/%(y)s.jpg
      grid: my_grid
-  pt_ortos2018:
+  pt_ortophoto_2018:
      type: tile
      url: http://cartografia.dgterritorio.gov.pt/ortos2018/service?service=wmts&request=gettile&version=1.0.0&layer=Ortos2018-RGB&style=default&format=image/png&TileMatrixSet=PTTM_06&TileMatrix=%(z)s&TileRow=%(y)s&TileCol=%(x)s
      grid: my_grid
