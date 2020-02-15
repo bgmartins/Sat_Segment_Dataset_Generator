@@ -11,14 +11,17 @@ caches:
   my_cache:
     grids: [my_grid]
     sources: [my_cache_in]
+    disable_storage: true
   my_cache_in:
     grids: [my_grid]
     sources: [my_source]
+    disable_storage: true
 
 sources:
   my_source:
      type: tile
-     url: http://tile.stamen.com/terrain/%(z)s/%(x)s/%(y)s.jpg
+#     url: http://tile.stamen.com/toner/%(z)s/%(x)s/%(y)s.png
+     url: https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/%(z)s/%(y)s/%(x)s.png
      grid: my_grid
 
 grids:

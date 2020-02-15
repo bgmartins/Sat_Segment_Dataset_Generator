@@ -89,7 +89,6 @@ class SatSegmentDatasetGenerator:
         return int(row), int(column)
         
     def download_map_tile(self, zoom=None, row=None, column=None):
-        print("http://tile.stamen.com/terrain/" + str(zoom) + "/" + str(column) + "/" + str(row) + ".jpg")
         aux = cv2.imdecode(np.asarray(bytearray(urllib.request.urlopen("http://127.0.0.1:8080/tms/1.0.0/base/EPSG3857/" + str(zoom - 1) + "/" + str(column) + "/" + str(row) + ".png").read()), dtype='uint8'), cv2.IMREAD_COLOR)
         dim = ( int(self.config["map_api"]["tile_size"]) , int(self.config["map_api"]["tile_size"]) )
         aux = cv2.resize(aux, dim)
