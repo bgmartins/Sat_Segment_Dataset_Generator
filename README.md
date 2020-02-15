@@ -1,4 +1,4 @@
-# Overhead Imagery Segmentation Dataset Generator
+# Overhead Imagery Segmentation Dataset Generator (OISDG)
 
 This project was developed to create datasets for semantic segmentation with overhead imagery. 
 
@@ -161,7 +161,8 @@ The configuration defines how the dataset is supposed to be generated. The struc
 }
 ```
 
-## Run The SSDG
+## Run The OISDG
+
 After the configuration has been created, the tool can be started with the following command, where `--output_path` defines the location to store the dataset and `--config_path` the path to the configuration created above. 
 
 ```
