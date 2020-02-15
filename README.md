@@ -1,4 +1,4 @@
-# Overhead-Imagery-Segmentation-Dataset-Generator
+# Overhead Imagery Segmentation Dataset Generator
 
 This project was developed to create datasets for semantic segmentation with satellite images. 
 
