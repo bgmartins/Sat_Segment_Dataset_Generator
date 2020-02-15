@@ -166,5 +166,5 @@ The configuration defines how the dataset is supposed to be generated. The struc
 After the configuration has been created, the tool can be started with the following command, where `--output_path` defines the location to store the dataset and `--config_path` the path to the configuration created above. 
 
 ```
-python3 oi_segment_dataset_generator.py --output_path ./dataset --config_path ./config.cfg
+python3 oisdg.py --output_path ./dataset --config_path ./config.cfg
 ```
