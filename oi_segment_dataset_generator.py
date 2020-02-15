@@ -73,10 +73,12 @@ class SatSegmentDatasetGenerator:
             print(str(round(percentage_per_tile * counter, 2)) + "%: Download osm data          ", end = '\r')
             label_data = self.download_overpass_data(percentage=str(round(percentage_per_tile * counter, 2)), south_latitude=left_bottom_latitude, west_longitude=left_bottom_longitude, north_latitude=right_top_latitude, east_longitude=right_top_longitude)
             print(str(round(percentage_per_tile * counter, 2)) + "%: Draw mask                          ", end = '\r')
-            mask = self.draw_mask(percentage=str(round(percentage_per_tile * counter, 2)), tile=satellite_tile, label_data=label_data, left_top=(left_top_latitude, left_top_longitude), right_top=(right_top_latitude, right_top_longitude), left_bottom=(left_bottom_latitude, left_bottom_longitude))
-            print(str(round(percentage_per_tile * counter, 2)) + "%: Saving record                                ", end = '\r')
-            cv2.imwrite(self.output_path + "/" + filename + ".jpg", satellite_tile)
-            cv2.imwrite(self.output_path + "/" + filename + "_m.jpg", mask)
+            mask, passFilter = self.draw_mask(percentage=str(round(percentage_per_tile * counter, 2)), tile=satellite_tile, label_data=label_data, left_top=(left_top_latitude, left_top_longitude), right_top=(right_top_latitude, right_top_longitude), left_bottom=(left_bottom_latitude, left_bottom_longitude))
+            if passFilter:
+                print(str(round(percentage_per_tile * counter, 2)) + "%: Saving record                                ", end = '\r')
+                cv2.imwrite(self.output_path + "/" + filename + ".jpg", satellite_tile)
+                cv2.imwrite(self.output_path + "/" + filename + "_m.jpg", mask)
+            else: print(str(round(percentage_per_tile * counter, 2)) + "%: Skipping record                              ", end = '\r')
             print(str(round(percentage_per_tile * counter, 2)) + "%: OK           ", end = '\r')
             counter += 1
         print("100.00%: Finished                                   ", end = '\r')
@@ -139,7 +141,9 @@ class SatSegmentDatasetGenerator:
         mask = np.zeros((self.config["map_api"]["tile_size"], self.config["map_api"]["tile_size"], 3), dtype = "uint8")
         counter = 1
         category_count = str(len(label_data["categories"]))
+        passFilter = True
         for category in label_data["categories"]:
+            mask_aux = np.zeros((self.config["map_api"]["tile_size"], self.config["map_api"]["tile_size"], 3), dtype = "uint8")
             print(percentage + "%: Draw category on mask [" + str(counter) + "/" + category_count +"]", end = '\r')
             color = (category["draw_options"]["color"]["b"], category["draw_options"]["color"]["g"], category["draw_options"]["color"]["r"])
             if category["draw_options"]["type"] == "area":
@@ -150,6 +154,7 @@ class SatSegmentDatasetGenerator:
                         points.append((node[0],node[1]))
                     points = self.geographical_coordinate_to_pixel(points, left_top=left_top, right_top=right_top, left_bottom=left_bottom)
                     cv2.drawContours(mask, [np.array(points, dtype=np.int32)], -1, color, -1)
+                    cv2.drawContours(mask_aux, [np.array(points, dtype=np.int32)], -1, (255,255,255), -1)
             elif category["draw_options"]["type"] == "line":
                 line_width = 1
                 if "line_width" in category["draw_options"]:
@@ -200,8 +205,9 @@ class SatSegmentDatasetGenerator:
                 flood_fill_mask
                 idx = (flood_fill_mask == 255)
                 mask[idx] = color
+            ratio = cv2.countNonZero(mask_aux) / float(int(self.config["map_api"]["tile_size"]) * int(self.config["map_api"]["tile_size"]))
             counter += 1
-        return mask
+        return mask, passFilter
 
     def geographical_coordinate_to_pixel(self, geographical_points=[], left_top=None, right_top=None, left_bottom=None):
         width_pp = self.config["map_api"]["tile_size"] / math.sqrt(((right_top[1] - left_top[1]) ** 2) + ((right_top[0] - left_top[0]) ** 2))
