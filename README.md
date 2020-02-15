@@ -25,7 +25,16 @@ The configuration defines how the dataset is supposed to be generated. The struc
 * This means that instead of the defined orange rectangle, the orange highlighted area is included (under certain zoom-levels).
 *
 * The minimum and maximum zoom level can also be restricted. 
-* If this is left at 0 and 19, all possible sizes for the range are automatically created.
+* If this is left at 5 and 19, all possible sizes for the range are automatically created.
+*
+* 2km 		5
+* 1km 		6
+* 500m		7
+* 250m		8
+* 125m		9
+* 62.5m		10
+* 31.25m	11
+* 15.625m	12
 */
     "location_range": {
         "top_left_location": {
@@ -37,7 +46,7 @@ The configuration defines how the dataset is supposed to be generated. The struc
             "longitude": 9.184387
         },
         "zoom_range": {
-            "min": 1,
+            "min": 5,
             "max": 17
         }
     },
