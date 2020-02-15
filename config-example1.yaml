@@ -1,8 +1,7 @@
-
 services:
   tms:
-    origin: 'nw'
-    
+    origin: sw
+        
 layers:
   - name: base
     title: Base Layer
@@ -12,29 +11,17 @@ caches:
   my_cache:
     grids: [my_grid]
     sources: [my_cache_in]
-    meta_size: [4, 4]
   my_cache_in:
     grids: [my_grid]
-    sources: [my_source2]
+    sources: [my_source]
 
 sources:
   my_source:
      type: tile
-     url: http://c.tile.openstreetmap.org/%(z)s/%(x)s/%(y)s.png
-     grid: osm_grid
-  my_source2:
-    type: wms
-    req:
-       url: https://image.discomap.eea.europa.eu/arcgis/services/GioLand/HRIM_HR_TrueColour_2018/ImageServer/WMSServer
-       layers: 0
-       transparent: false
+     url: http://tile.stamen.com/terrain/%(z)s/%(x)s/%(y)s.jpg
+     grid: my_grid
 
 grids:
-  osm_grid:
-    srs: EPSG:900913
-    num_levels: 19
-    origin: nw
   my_grid:
     srs: EPSG:3857
-    num_levels: 19
-    origin: nw
+    origin: sw
