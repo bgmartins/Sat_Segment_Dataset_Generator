@@ -1,4 +1,4 @@
-# Sat-Segment-Dataset-Generator
+# Overhead-Imagery-Segmentation-Dataset-Generator
 
 This project was developed to create datasets for semantic segmentation with satellite images. 
 
@@ -37,12 +37,12 @@ The configuration defines how the dataset is supposed to be generated. The struc
             "longitude": 9.184387
         },
         "zoom_range": {
-            "min": 0,
-            "max": 19
+            "min": 1,
+            "max": 17
         }
     },
 /*
-* Defines the image size of the tiles.
+* Defines the image size of the tiles and the configuration for the map tile proxy service.
 */
 	"map_api": {
 		"tile_size": 512,
@@ -155,5 +155,5 @@ The configuration defines how the dataset is supposed to be generated. The struc
 After the configuration has been created, the tool can be started with the following command, where `--output_path` defines the location to store the dataset and `--config_path` the path to the configuration created above. 
 
 ```
-python3 sat_segment_dataset_generator.py --output_path ./dataset --config_path ./config.cfg --map_config_path ./map_config.yaml
+python3 oi_segment_dataset_generator.py --output_path ./dataset --config_path ./config.cfg
 ```
