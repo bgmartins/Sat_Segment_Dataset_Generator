@@ -133,6 +133,8 @@ class SegmentDatasetGenerator:
                     dataset_category["objects"].append(element["nodes"])
                 elif element["type"] == "node": 
                     label_data["nodes"][element["id"]] = [float(element["lat"]), float(element["lon"])]
+            if "max_pixel_ratio" in category: dataset_category["max_pixel_ratio"] = category["max_pixel_ratio"]
+            if "min_pixel_ratio" in category: dataset_category["min_pixel_ratio"] = category["min_pixel_ratio"]
             label_data["categories"].append(dataset_category)
             counter += 1
         return label_data
@@ -141,9 +143,10 @@ class SegmentDatasetGenerator:
         mask = np.zeros((self.config["map_api"]["tile_size"], self.config["map_api"]["tile_size"], 3), dtype = "uint8")
         counter = 1
         category_count = str(len(label_data["categories"]))
-        passFilter = True
+        passFilter = False
+        counterFilter = 0
         for category in label_data["categories"]:
-            mask_aux = np.zeros((self.config["map_api"]["tile_size"], self.config["map_api"]["tile_size"], 3), dtype = "uint8")
+            mask_aux = np.zeros((self.config["map_api"]["tile_size"], self.config["map_api"]["tile_size"], 1), dtype = "uint8")
             print(percentage + "%: Draw category on mask [" + str(counter) + "/" + category_count +"]", end = '\r')
             color = (category["draw_options"]["color"]["b"], category["draw_options"]["color"]["g"], category["draw_options"]["color"]["r"])
             if category["draw_options"]["type"] == "area":
@@ -154,7 +157,7 @@ class SegmentDatasetGenerator:
                         points.append((node[0],node[1]))
                     points = self.geographical_coordinate_to_pixel(points, left_top=left_top, right_top=right_top, left_bottom=left_bottom)
                     cv2.drawContours(mask, [np.array(points, dtype=np.int32)], -1, color, -1)
-                    cv2.drawContours(mask_aux, [np.array(points, dtype=np.int32)], -1, (255,255,255), -1)
+                    cv2.drawContours(mask_aux, [np.array(points, dtype=np.int32)], -1, 255, -1)
             elif category["draw_options"]["type"] == "line":
                 line_width = 1
                 if "line_width" in category["draw_options"]:
@@ -168,6 +171,7 @@ class SegmentDatasetGenerator:
                     i = 0
                     while i < (len(points) - 1):
                         cv2.line(mask, (points[i][0], points[i][1]), (points[i + 1][0], points[i + 1][1]), color, line_width)
+                        cv2.line(mask_aux, (points[i][0], points[i][1]), (points[i + 1][0], points[i + 1][1]), 255, line_width)
                         i += 1
             elif category["draw_options"]["type"] == "dot":
                 circuit_radius = 3
@@ -181,6 +185,7 @@ class SegmentDatasetGenerator:
                     points = self.geographical_coordinate_to_pixel(points, left_top=left_top, right_top=right_top, left_bottom=left_bottom)
                     for point in points:
                         cv2.circle(mask, (point[0], point[1]), circuit_radius, color, thickness=-1, lineType=8, shift=0)
+                        cv2.circle(mask_aux, (point[0], point[1]), circuit_radius, 255, thickness=-1, lineType=8, shift=0)
             if "flood_fill" in category["draw_options"]:
                 print(percentage + "%: Flood-Fill category on mask [" + str(counter) + "/" + category_count +"]", end = '\r')
                 connected_components = 4
@@ -205,9 +210,15 @@ class SegmentDatasetGenerator:
                 flood_fill_mask
                 idx = (flood_fill_mask == 255)
                 mask[idx] = color
-            ratio = cv2.countNonZero(mask_aux) / float(int(self.config["map_api"]["tile_size"]) * int(self.config["map_api"]["tile_size"]))
+                mask_aux[idx] = 255
+            ratio = float(cv2.countNonZero(mask_aux)) / float(int(self.config["map_api"]["tile_size"]) * int(self.config["map_api"]["tile_size"]))
+            if "max_pixel_ratio" in category or "min_pixel_ratio" in category:
+                counterFilter += 1
+                if "max_pixel_ratio" in category and "min_pixel_ratio" in category and ratio <= float(category["max_pixel_ratio"]) and ratio >= float(category["min_pixel_ratio"]): passFilter = True
+                elif "max_pixel_ratio" in category and not("min_pixel_ratio" in category) and ratio <= float(category["max_pixel_ratio"]): passFilter = True 
+                elif "min_pixel_ratio" in category and not("max_pixel_ratio" in category) and ratio >= float(category["min_pixel_ratio"]): passFilter = True
             counter += 1
-        return mask, passFilter
+        return mask, passFilter or (counterFilter == 0)
 
     def geographical_coordinate_to_pixel(self, geographical_points=[], left_top=None, right_top=None, left_bottom=None):
         width_pp = self.config["map_api"]["tile_size"] / math.sqrt(((right_top[1] - left_top[1]) ** 2) + ((right_top[0] - left_top[0]) ** 2))
