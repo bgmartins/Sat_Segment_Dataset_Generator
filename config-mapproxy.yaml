@@ -14,7 +14,7 @@ caches:
     disable_storage: true
   my_cache_in:
     grids: [my_grid]
-    sources: [satelite]
+    sources: [world_imagery]
     disable_storage: true
 
 sources:
