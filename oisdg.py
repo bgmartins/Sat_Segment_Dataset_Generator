@@ -8,6 +8,8 @@ import signal
 import argparse
 import requests
 import subprocess
+import http.server
+import socketserver
 import numpy as np
 import urllib.request
 from osgeo import gdal
@@ -22,7 +24,12 @@ class SegmentDatasetGenerator:
         self.config = config
         self.output_path = output_path
         self.map_tiles = []
-        self.proxy=subprocess.Popen(["mapproxy-util", "serve-develop", config["map_api"]["config_path"]])
+        if config["map_api"]["config_path"].endswith(".tif") or config["map_api"]["config_path"].endswith(".tiff"):
+            # "gdal2tiles --profile=mercator -z 1-18 yourmap.tif /tmp/tms/1.0.0/base/EPSG3857/"
+            class Handler(http.server.SimpleHTTPRequestHandler):
+                def __init__(self, *args, **kwargs): super().__init__(*args, directory="/tmp/tms/1.0.0/base/EPSG3857", **kwargs)
+            with socketserver.TCPServer(("", 8080), Handler) as httpd: httpd.serve_forever()
+        else: self.proxy=subprocess.Popen(["mapproxy-util", "serve-develop", config["map_api"]["config_path"]])
         def kill_child(): os.kill(self.proxy.pid, signal.SIGTERM)
         atexit.register(kill_child)
         time.sleep(5)
