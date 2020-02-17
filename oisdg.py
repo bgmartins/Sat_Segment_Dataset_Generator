@@ -3,15 +3,18 @@ import cv2
 import json
 import math
 import time
+import shutil
 import atexit
 import signal
 import argparse
 import requests
 import subprocess
+import tempfile
 import http.server
 import socketserver
 import numpy as np
 import urllib.request
+from pathlib import Path
 from osgeo import gdal
 from osgeo import ogr
 from copy import deepcopy
@@ -25,12 +28,16 @@ class SegmentDatasetGenerator:
         self.output_path = output_path
         self.map_tiles = []
         if config["map_api"]["config_path"].endswith(".tif") or config["map_api"]["config_path"].endswith(".tiff"):
-            # "gdal2tiles --profile=mercator -z 1-18 yourmap.tif /tmp/tms/1.0.0/base/EPSG3857/"
+            self.proxy = tempfile.mkdtemp()
+            Path(self.proxy + "/tmp/tms/1.0.0/base/EPSG3857/").mkdir(parents=True, exist_ok=True)
+            subprocess.run(["gdal2tiles", "--profile=mercator", "-z", "1-18", config["map_api"]["config_path"], self.proxy + "/tmp/tms/1.0.0/base/EPSG3857/"])
             class Handler(http.server.SimpleHTTPRequestHandler):
-                def __init__(self, *args, **kwargs): super().__init__(*args, directory="/tmp/tms/1.0.0/base/EPSG3857", **kwargs)
+                def __init__(self, *args, **kwargs): super().__init__(*args, directory=self.proxy + "/tmp/tms/1.0.0/base/EPSG3857/", **kwargs)
             with socketserver.TCPServer(("", 8080), Handler) as httpd: httpd.serve_forever()
         else: self.proxy=subprocess.Popen(["mapproxy-util", "serve-develop", config["map_api"]["config_path"]])
-        def kill_child(): os.kill(self.proxy.pid, signal.SIGTERM)
+        def kill_child():
+            if isinstance(self.proxy,str): shutil.rmtree(self.proxy, ignore_errors=True)
+            else: os.kill(self.proxy.pid, signal.SIGTERM)
         atexit.register(kill_child)
         time.sleep(5)
         self.calculate_tiles()
